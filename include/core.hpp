@@ -3,18 +3,35 @@
 
 #include <cstdint>
 
-struct Image {
-  int width, height;
-  uint8_t* data;
-};
+typedef struct {
+  int width;
+  int height;
+  int channels;
+  uint8_t *data;
+} Image;
 
-Image *create_image();
-void free_image();
+/*
+ * @brief
+ * Memory management
+ */
+Image *create_image(int width, int height, int channels);
+void free_image(Image *img);
+Image *copy_image(const Image *src);
 
-Image *copy_image();
-uint8_t *get_pixel();
-void set_pixel();
-Image *load_image();
-void save_image();
+/*
+ * @brief
+ * Pixel access
+ */
+uint8_t *get_pixel(Image *img, int x, int y);
+void set_pixel(Image *img, int x, int y, uint8_t r, uint8_t g, uint8_t b);
+
+/*
+ * @brief
+ * I/O Operations
+ */
+Image *load_image(const char *filename);
+void save_image(const char *filename, const Image *img);
+
+void image_print_info(const Image *img);
 
 #endif // !CORE_HPP

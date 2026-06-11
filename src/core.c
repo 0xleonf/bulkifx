@@ -1,9 +1,9 @@
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #define STB_IMAGE_IMPLEMENTATION
-#include "../include/core.hpp"
+#include "../include/core.h"
 #include "../include/stb_image.h"
 
 Image *image_create(int width, int height, int channels) {

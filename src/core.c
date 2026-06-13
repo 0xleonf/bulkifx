@@ -1,12 +1,15 @@
+#include "../include/core.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include "../include/core.h"
-#include "../include/stb_image.h"
 
-Image *image_create(int width, int height, int channels) {
+#define STB_IMAGE_IMPLEMENTATION
+#include "../include/stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../include/stb_image_write.h"
+
+Image *create_image(int width, int height, int channels) {
   Image *img = (Image *)malloc(sizeof(Image));
 
   if (!img)
@@ -57,7 +60,7 @@ Image *load_image(const char *filename) {
     return NULL;
   }
 
-  Image *img = image_create(width, height, 3);
+  Image *img = create_image(width, height, 3);
   if (!img) {
     stbi_image_free(stb_data);
     return NULL;
@@ -80,6 +83,23 @@ Image *load_image(const char *filename) {
 
   stbi_image_free(stb_data);
   return img;
+}
+
+void save_image(const char *filename, const Image *img) {
+  if (!img->data) {
+    fprintf(stderr, "Error: no image to save!");
+    return;
+  }
+
+  int stride_in_bytes = img->width * img->channels;
+
+  int success = stbi_write_jpg(filename, img->width, img->height, img->channels,
+                               img->data, stride_in_bytes);
+  if (success) {
+    printf("Succeed: Image successfully saved '%s'\n", filename);
+  } else {
+    fprintf(stderr, "Error: Failed to write image %s\n", filename);
+  }
 }
 
 void image_print_info(const Image *img) {

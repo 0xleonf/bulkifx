@@ -2,4 +2,7 @@ build/
 .cache/
 spiderman.jpg
 python.py
+.venv
+bulkifxApp/__pycache__
 patrick.jpg
+gray_output.jpg

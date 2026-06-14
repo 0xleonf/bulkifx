@@ -3,7 +3,7 @@ import bulkifxApp as bp
 
 output_ = "gray_output.jpg"
 
-img = bp.load_image("patrick.jpg")
+img = bp.load_image("spon.jpg")
 
 img_gray = bp.convert_grayscale(img)
 

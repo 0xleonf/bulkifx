@@ -6,3 +6,7 @@ python.py
 bulkifxApp/__pycache__
 patrick.jpg
 gray_output.jpg
+pillow_benchmark.py
+gray_pillow.jpg
+gray_output.jpg
+spon.jpg

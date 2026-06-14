@@ -1,3 +1,3 @@
 # BULKIFX
 
-This is an image cli program where user can apply effect to many images at once
+This is an image processing library write on C, available in Python

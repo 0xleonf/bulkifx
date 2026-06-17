@@ -1,5 +1,6 @@
 #include "../include/img_proc.h"
 #include "../include/core.h"
+#include <immintrin.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -9,20 +10,25 @@ Image *grayscale(Image *img) {
 
   Image *gray_img = create_image(img->width, img->height, 1);
 
-  for (int y = 0; y < img->height; y++) {
-    for (int x = 0; x < img->width; x++) {
+  int total_pixel = (img->width * img->height);
+  uint8_t *gray_pixel = (uint8_t *)malloc(total_pixel);
+  uint8_t *red = (uint8_t *)malloc(total_pixel);
+  uint8_t *green = (uint8_t *)malloc(total_pixel);
+  uint8_t *blue = (uint8_t *)malloc(total_pixel);
+  int index = 0;
 
-      uint8_t *src_pixel = get_pixel(img, x, y);
+  for (int i = 0; i < total_pixel * 3; i += 3) {
+    red[index] = img->data[i + 0] * 0.299f;
+    green[index] = img->data[i + 1] * 0.587f;
+    blue[index] = img->data[i + 2] * 0.114f;
 
-      uint8_t *dst_pixel = get_pixel(gray_img, x, y);
+    gray_img->data[index] = gray_pixel[index] =
+        (red[index] + green[index] + blue[index]);
 
-      if (src_pixel && dst_pixel) {
-        uint8_t red = src_pixel[0], green = src_pixel[1], blue = src_pixel[2];
-
-        dst_pixel[0] = ((0.299 * red) + (0.587 * green) + (0.114 * blue) + 0.5);
-      }
-    }
+    index++;
   }
+
+  free(red), free(green), free(blue), free(gray_pixel);
 
   return gray_img;
 }

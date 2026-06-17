@@ -66,20 +66,29 @@ Image *load_image(const char *filename) {
     return NULL;
   }
 
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      int src_idx = (y * width + x) * channels;
-      uint8_t *dst = get_pixel(img, x, y);
+  int total_pixel = width * height;
 
-      if (channels >= 3) {
-        dst[0] = stb_data[src_idx];
-        dst[1] = stb_data[src_idx + 1];
-        dst[2] = stb_data[src_idx + 2];
-      } else if (channels == 1) {
-        dst[0] = dst[1] = dst[3] = stb_data[src_idx];
-      }
-    }
+  uint8_t *red = (uint8_t *)malloc(total_pixel);
+  uint8_t *green = (uint8_t *)malloc(total_pixel);
+  uint8_t *blue = (uint8_t *)malloc(total_pixel);
+  int index = 0;
+
+  for (int i = 0; i < total_pixel * 3; i += 3) {
+    red[index] = stb_data[i + 0];
+    green[index] = stb_data[i + 1];
+    blue[index] = stb_data[i + 2];
+    index++;
   }
+
+  index = 0;
+  for (int i = 0; i < total_pixel * 3; i += 3) {
+    img->data[i + 0] = red[index];
+    img->data[i + 1] = green[index];
+    img->data[i + 2] = blue[index];
+    index++;
+  }
+
+  free(red), free(green), free(blue);
 
   stbi_image_free(stb_data);
   return img;

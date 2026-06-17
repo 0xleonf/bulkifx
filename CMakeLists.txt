@@ -13,8 +13,11 @@ set(LIB_SOURCES
 
 add_library(bulkifx SHARED ${LIB_SOURCES})
 
+target_compile_options(bulkifx PRIVATE -O3 -march=native)
 target_link_libraries(bulkifx m)
 
 add_executable(bulkifxApp main.c)
+target_compile_options(bulkifxApp PRIVATE -O3 -march=native)
+
 target_link_libraries(bulkifxApp bulkifx)
 

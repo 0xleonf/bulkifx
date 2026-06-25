@@ -1,4 +1,5 @@
 #include "../include/core.h"
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,28 +20,37 @@ Image *create_image(int width, int height, int channels) {
   img->height = height;
   img->channels = channels;
 
-  size_t data_size = width * height * channels * sizeof(uint8_t);
-  img->data = (uint8_t *)malloc(data_size);
+  size_t data_size = width * height * sizeof(uint8_t);
+  img->R = (uint8_t *)malloc(data_size);
+  img->G = (uint8_t *)malloc(data_size);
+  img->B = (uint8_t *)malloc(data_size);
 
-  if (!img->data) {
+  img->data = (uint8_t *)malloc(data_size * channels);
+
+  if (!img->R || !img->G || !img->B) {
+    free(img->R), free(img->G), free(img->B), free(img->data);
     free(img);
     return NULL;
   }
 
-  memset(img->data, 0, data_size);
+  memset(img->R, 0, data_size);
+  memset(img->G, 0, data_size);
+  memset(img->B, 0, data_size);
   return img;
 }
 
-void image_free(Image *img) {
+void free_image(Image *img) {
   if (img) {
-    if (img->data)
-      free(img->data);
+
+    if (img->R || img->G || img->B || img->data)
+      free(img->R), free(img->G), free(img->B), free(img->data);
+
     free(img);
   }
 }
 
 uint8_t *get_pixel(Image *img, int x, int y) {
-  if (!img || !img->data)
+  if (!img || (!img->R && !img->G && !img->B))
     return NULL;
 
   if (x < 0 || x >= img->width || y < 0 || y >= img->height)
@@ -48,6 +58,14 @@ uint8_t *get_pixel(Image *img, int x, int y) {
 
   return &img->data[(y * img->width + x) * img->channels];
 }
+
+// void stored_pixel(Image *img, int total_pixel) {
+//   for (int i = 0; i < total_pixel; i++) {
+//     img->data[3 * i] = img->R[i];
+//     img->data[3 * i + 1] = img->G[i];
+//     img->data[3 * i + 2] = img->B[i];
+//   }
+// }
 
 Image *load_image(const char *filename) {
   int width;
@@ -71,21 +89,15 @@ Image *load_image(const char *filename) {
   uint8_t *red = (uint8_t *)malloc(total_pixel);
   uint8_t *green = (uint8_t *)malloc(total_pixel);
   uint8_t *blue = (uint8_t *)malloc(total_pixel);
-  int index = 0;
 
-  for (int i = 0; i < total_pixel * 3; i += 3) {
-    red[index] = stb_data[i + 0];
-    green[index] = stb_data[i + 1];
-    blue[index] = stb_data[i + 2];
-    index++;
-  }
+  for (int i = 0; i < total_pixel; i++) {
+    red[i] = stb_data[3 * i];
+    green[i] = stb_data[3 * i + 1];
+    blue[i] = stb_data[3 * i + 2];
 
-  index = 0;
-  for (int i = 0; i < total_pixel * 3; i += 3) {
-    img->data[i + 0] = red[index];
-    img->data[i + 1] = green[index];
-    img->data[i + 2] = blue[index];
-    index++;
+    img->R[i] = red[i];
+    img->G[i] = green[i];
+    img->B[i] = blue[i];
   }
 
   free(red), free(green), free(blue);
@@ -94,8 +106,8 @@ Image *load_image(const char *filename) {
   return img;
 }
 
-void save_image(const char *filename, const Image *img) {
-  if (!img->data) {
+void save_image(const char *filename, Image *img) {
+  if (!img->R || !img->G || !img->B) {
     fprintf(stderr, "Error: no image to save!");
     return;
   }
@@ -109,6 +121,8 @@ void save_image(const char *filename, const Image *img) {
   } else {
     fprintf(stderr, "Error: Failed to write image %s\n", filename);
   }
+
+  free_image(img);
 }
 
 void image_print_info(const Image *img) {

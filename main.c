@@ -29,7 +29,7 @@
 // }
 //
 int main() {
-  const char *filename = "patrick.jpg";
+  const char *filename = "spon.jpg";
   Image *img = load_image(filename);
 
   Image *gray = grayscale(img);
@@ -38,7 +38,7 @@ int main() {
 
   image_print_info(img);
 
-  // free_image(gray);
+  free_image(gray);
   free_image(img);
 
   // check_matrices(img, 0, 10);

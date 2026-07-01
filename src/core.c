@@ -121,8 +121,6 @@ void save_image(const char *filename, Image *img) {
   } else {
     fprintf(stderr, "Error: Failed to write image %s\n", filename);
   }
-
-  free_image(img);
 }
 
 void image_print_info(const Image *img) {

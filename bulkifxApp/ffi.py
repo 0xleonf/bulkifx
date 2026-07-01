@@ -20,10 +20,13 @@ lib = ctypes.CDLL(_path_so)
 
 class Image(ctypes.Structure):
     _fields_ = [
+        ("R", ctypes.POINTER(ctypes.c_uint8)),
+        ("G", ctypes.POINTER(ctypes.c_uint8)),
+        ("B", ctypes.POINTER(ctypes.c_uint8)),
+        ("data", ctypes.POINTER(ctypes.c_uint8)),
         ("width", ctypes.c_int),
         ("height", ctypes.c_int),
-        ("channels", ctypes.c_int),
-        ("data", ctypes.POINTER(ctypes.c_uint8))
+        ("channels", ctypes.c_int)
     ]
 
 
@@ -39,8 +42,8 @@ lib.image_print_info.restype = None
 lib.save_image.argtypes = [ctypes.c_char_p, ImagePtr]
 lib.save_image.restype = None
 
-lib.image_free.argtypes = [ImagePtr]
-lib.image_free.restype = None
+lib.free_image.argtypes = [ImagePtr]
+lib.free_image.restype = None
 
 # img_proc.c
 lib.grayscale.argtypes = [ImagePtr]

@@ -23,7 +23,7 @@ def save_image(filename: str, img_ptr: ImagePtr) -> None:
 
     filename_bytes = filename.encode("utf-8")
     lib.save_image(filename_bytes, img_ptr)
-    lib.image_free(img_ptr)
+    lib.free_image(img_ptr)
 
 
 def convert_grayscale(img_ptr: ImagePtr) -> ImagePtr:
@@ -45,4 +45,4 @@ def free_image(img_ptr: ImagePtr) -> None:
     Freed memory allocation in C.
     """
     if img_ptr:
-        lib.image_free(img_ptr)
+        lib.free_image(img_ptr)

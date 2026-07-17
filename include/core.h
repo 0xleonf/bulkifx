@@ -15,6 +15,11 @@ typedef struct {
   int channels;
 } Image;
 
+typedef struct {
+  float *values;
+  int capacity;
+} Kernel;
+
 /*
  * @brief
  * Memory management
@@ -32,9 +37,13 @@ void set_pixel(Image *img, int x, int y, uint8_t r, uint8_t g, uint8_t b);
 
 /*
  * @brief
- * Stored result into single array
+ * Help me!!!!
  * */
 void stored_pixel(Image *img, int total_pixel);
+void zero_padding(uint8_t *channel, int width, int height, Kernel *kernel);
+Kernel *blur_kernel(Kernel *kernel, int capacity);
+void convolution(unsigned char *input, unsigned char *output, int width,
+                 int height, float *kernel, int capacity);
 
 /*
  * @brief

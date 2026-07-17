@@ -19,11 +19,19 @@ Image *grayscale(Image *img) {
     red[i] = (img->R[i] * 0.299f);
     green[i] = (img->G[i] * 0.587f);
     blue[i] = (img->B[i] * 0.114f);
- 
-    gray_img->data[i] = (uint8_t)(red[i] + green[i] + blue[i]); 
-  } 
+
+    gray_img->data[i] = (uint8_t)(red[i] + green[i] + blue[i]);
+  }
 
   free(red), free(green), free(blue);
 
   return gray_img;
+}
+
+Image *blurr(Image *img) {
+  if (img == NULL)
+    exit(1);
+
+
+  return img;
 }

@@ -13,5 +13,6 @@ float sigma(int radius);
  */
 float gauss(int x, int radius);
 
+int clamp(int x, int min, int max);
 
 #endif // !UTILS_H

@@ -9,3 +9,11 @@ float gauss(int x, int radius) {
   float exponent = (x * x) / (2 * (s * s));
   return (1 / (2 * PI * (s * s))) * exp(exponent);
 }
+
+int clamp(int x, int min, int max) {
+  if (x < min)
+    return min;
+  if (x > max)
+    return max;
+  return x;
+}

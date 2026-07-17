@@ -1,4 +1,5 @@
 #include "../include/core.h"
+#include "../include/utils.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -11,7 +12,7 @@
 #include "../include/stb_image_write.h"
 
 Image *create_image(int width, int height, int channels) {
-  Image *img = (Image *)malloc(sizeof(Image));
+  Image *img = malloc(sizeof(Image));
 
   if (!img)
     return NULL;
@@ -21,9 +22,9 @@ Image *create_image(int width, int height, int channels) {
   img->channels = channels;
 
   size_t data_size = width * height * sizeof(uint8_t);
-  img->R = (uint8_t *)malloc(data_size);
-  img->G = (uint8_t *)malloc(data_size);
-  img->B = (uint8_t *)malloc(data_size);
+  img->R = malloc(data_size);
+  img->G = malloc(data_size);
+  img->B = malloc(data_size);
 
   img->data = (uint8_t *)malloc(data_size * channels);
 
@@ -59,13 +60,75 @@ uint8_t *get_pixel(Image *img, int x, int y) {
   return &img->data[(y * img->width + x) * img->channels];
 }
 
-// void stored_pixel(Image *img, int total_pixel) {
-//   for (int i = 0; i < total_pixel; i++) {
-//     img->data[3 * i] = img->R[i];
-//     img->data[3 * i + 1] = img->G[i];
-//     img->data[3 * i + 2] = img->B[i];
-//   }
-// }
+void stored_pixel(Image *img, int total_pixel) {
+  for (int i = 0; i < total_pixel; i++) {
+    img->data[3 * i] = img->R[i];
+    img->data[3 * i + 1] = img->G[i];
+    img->data[3 * i + 2] = img->B[i];
+  }
+}
+
+void zero_padding(uint8_t *channel, int width, int height, Kernel *kernel) {
+  int radius = kernel->capacity / 2;
+  width += (2 * radius);
+  height += (2 * radius);
+
+  channel = calloc(width * height, sizeof(Image));
+}
+
+Kernel *blur_kernel(Kernel *kernel, int capacity) {
+  float sum = 0.0f;
+  int radius = capacity / 2;
+  kernel->capacity = capacity;
+
+  for (int i = 0; i < capacity; i++) {
+    int row = i - radius;
+    kernel->values[i] = gauss(i, radius);
+  }
+  return kernel;
+}
+
+void convolution(unsigned char *input, unsigned char *output, int width,
+                 int height, float *kernel, int capacity) {
+  int radius = capacity / 2;
+
+  Kernel *k = malloc(sizeof(Kernel));
+
+  blur_kernel(k, capacity);
+
+  float *temp = malloc(width * height * sizeof(float));
+  if (!temp)
+    return;
+
+  // horizontal
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      float sum = 0.0f;
+
+      for (int kr = 0; kr < capacity; kr++) {
+        int pixel_x = clamp(x + (kr - radius), 0, width - 1);
+        sum += input[y * width + pixel_x] * k->values[kr];
+      }
+      temp[y * width + x] = sum;
+    }
+  }
+
+  // vertical
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      float sum = 0.0f;
+
+      for (int kr = 0; kr < capacity; kr++) {
+        int pixel_y = clamp(y + (kr - radius), 0, width - 1);
+        sum += temp[pixel_y * width + x];
+      }
+      int final_value = (int)(sum + 0.5f);
+      output[y * width + x] = (unsigned char)clamp(final_value, 0, 255);
+    }
+  }
+
+  free(temp);
+}
 
 Image *load_image(const char *filename) {
   int width;
@@ -86,21 +149,13 @@ Image *load_image(const char *filename) {
 
   int total_pixel = width * height;
 
-  uint8_t *red = (uint8_t *)malloc(total_pixel);
-  uint8_t *green = (uint8_t *)malloc(total_pixel);
-  uint8_t *blue = (uint8_t *)malloc(total_pixel);
-
   for (int i = 0; i < total_pixel; i++) {
-    red[i] = stb_data[3 * i];
-    green[i] = stb_data[3 * i + 1];
-    blue[i] = stb_data[3 * i + 2];
-
-    img->R[i] = red[i];
-    img->G[i] = green[i];
-    img->B[i] = blue[i];
+    img->R[i] = stb_data[3 * i];
+    img->G[i] = stb_data[3 * i + 1];
+    img->B[i] = stb_data[3 * i + 2];
   }
 
-  free(red), free(green), free(blue);
+  stored_pixel(img, total_pixel);
 
   stbi_image_free(stb_data);
   return img;

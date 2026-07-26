@@ -27,3 +27,31 @@ Image *grayscale(Image *img) {
 
   return gray_img;
 }
+
+Image *sepia(Image *img) {
+  if (!img || !img->R || !img->G || !img->B) return NULL;
+
+  Image *sepia_img = create_image(img->width, img->height, 3);
+
+  int total_pixel = img->width * img->height;
+
+  for (int i = 0; i < total_pixel; i++) {
+    float r_val = (img->R[i] * 0.393f) + (img->G[i] * 0.769f) + (img->B[i] * 0.189f);
+    float g_val = (img->R[i] * 0.349f) + (img->G[i] * 0.686f) + (img->B[i] * 0.168f);
+    float b_val = (img->R[i] * 0.272f) + (img->G[i] * 0.534f) + (img->B[i] * 0.131f);
+
+    float clamped_r = (r_val > 255.0f) ? 255.0f : r_val;
+    float clamped_g = (g_val > 255.0f) ? 255.0f : g_val;
+    float clamped_b = (b_val > 255.0f) ? 255.0f : b_val;
+
+    sepia_img->R[i] = (uint8_t)clamped_r;
+    sepia_img->G[i] = (uint8_t)clamped_g;
+    sepia_img->B[i] = (uint8_t)clamped_b;
+
+    sepia_img->data[3 * i] = (uint8_t)clamped_r;
+    sepia_img->data[3 * i + 1] = (uint8_t)clamped_g;
+    sepia_img->data[3 * i + 2] = (uint8_t)clamped_b;
+
+  }
+  return sepia_img;
+}

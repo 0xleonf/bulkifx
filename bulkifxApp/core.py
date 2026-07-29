@@ -40,6 +40,21 @@ def convert_grayscale(img_ptr: ImagePtr) -> ImagePtr:
     return img_gray_ptr
 
 
+def convert_sepia(img_ptr: ImagePtr) -> ImagePtr:
+    """
+    Convert image to sepia
+    """
+
+    if not img_ptr:
+        raise ValueError("Pointer source image NULL.")
+
+    img_sepia_ptr = lib.sepia(img_ptr)
+    if not img_sepia_ptr:
+        raise RuntimeError("Failed to process from binary C.")
+
+    return img_sepia_ptr
+
+
 def free_image(img_ptr: ImagePtr) -> None:
     """
     Freed memory allocation in C.

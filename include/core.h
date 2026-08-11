@@ -4,16 +4,23 @@
 #include <stdint.h>
 
 typedef struct {
-  uint8_t *R;
-  uint8_t *G;
-  uint8_t *B;
+  int8_t *R;
+  int8_t *G;
+  int8_t *B;
   // uint8_t *A;
-  uint8_t *data;
+  int8_t *data;
 
   int width;
   int height;
   int channels;
 } Image;
+
+typedef struct {
+  int8_t *pixel;
+
+  int width;
+  int height;
+} Matrix;
 
 typedef struct {
   float *values;
@@ -32,18 +39,22 @@ Image *copy_image(const Image *src);
  * @brief
  * Pixel access
  */
-uint8_t *get_pixel(Image *img, int x, int y);
-void set_pixel(Image *img, int x, int y, uint8_t r, uint8_t g, uint8_t b);
+int8_t *get_pixel(Image *img, int x, int y);
+void set_pixel(Image *img, int x, int y, int8_t r, int8_t g, int8_t b);
 
 /*
  * @brief
  * Help me!!!!
  * */
 void stored_pixel(Image *img, int total_pixel);
-void zero_padding(uint8_t *channel, int width, int height, Kernel *kernel);
+// void zero_padding(uint8_t *red_ch, uint8_t *green_ch, uint8_t *blue_ch,
+//                   Image *img, int width, int height, int kernel_size);
+Matrix *zero_padding(Image *img, int8_t *input, int pad_width);
+Matrix *convolute_horizontal(Image *img, int8_t *input, int8_t *filter,
+                             int filter_len);
 Kernel *blur_kernel(Kernel *kernel, int capacity);
-void convolution(unsigned char *input, unsigned char *output, int width,
-                 int height, float *kernel, int capacity);
+void convolution(Image *input, Image *output, int width, int height,
+                 float *kernel, int capacity);
 
 /*
  * @brief

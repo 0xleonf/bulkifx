@@ -21,12 +21,12 @@ Image *create_image(int width, int height, int channels) {
   img->height = height;
   img->channels = channels;
 
-  size_t data_size = width * height * sizeof(uint8_t);
+  size_t data_size = width * height * sizeof(int8_t);
   img->R = malloc(data_size);
   img->G = malloc(data_size);
   img->B = malloc(data_size);
 
-  img->data = (uint8_t *)malloc(data_size * channels);
+  img->data = malloc(data_size * channels * sizeof(int8_t));
 
   if (!img->R || !img->G || !img->B) {
     free(img->R), free(img->G), free(img->B), free(img->data);
@@ -34,9 +34,10 @@ Image *create_image(int width, int height, int channels) {
     return NULL;
   }
 
-  memset(img->R, 0, data_size);
-  memset(img->G, 0, data_size);
-  memset(img->B, 0, data_size);
+  img->R = calloc(data_size, sizeof(int8_t));
+  img->G = calloc(data_size, sizeof(int8_t));
+  img->B = calloc(data_size, sizeof(int8_t));
+
   return img;
 }
 
@@ -50,7 +51,7 @@ void free_image(Image *img) {
   }
 }
 
-uint8_t *get_pixel(Image *img, int x, int y) {
+int8_t *get_pixel(Image *img, int x, int y) {
   if (!img || (!img->R && !img->G && !img->B))
     return NULL;
 
@@ -68,12 +69,45 @@ void stored_pixel(Image *img, int total_pixel) {
   }
 }
 
-void zero_padding(uint8_t *channel, int width, int height, Kernel *kernel) {
-  int radius = kernel->capacity / 2;
-  width += (2 * radius);
-  height += (2 * radius);
+Matrix *zero_padding(Image *img, int8_t *input, int pad_width) {
+  int pad = pad_width * 2;
+  Matrix *output = malloc(sizeof(Matrix));
+  output->width = (img->width + pad);
+  output->height = (img->height + pad);
+  output->pixel = calloc((output->width) * (output->height), sizeof(int8_t));
 
-  channel = calloc(width * height, sizeof(Image));
+  for (int y = 0; y < img->height; y++) {
+    for (int x = 0; x < img->width; x++) {
+      output->pixel[(y + pad_width) * output->width + (x + pad_width)] =
+          input[y * img->width + x];
+    }
+  }
+
+  return output;
+}
+
+Matrix *convolute_horizontal(Image *img, int8_t *input, int8_t *filter,
+                             int filter_len) {
+  Matrix *output = malloc(sizeof(Matrix));
+  int new_width = img->width - filter_len + 1;
+  int new_height = img->height;
+  output->width = new_width;
+  output->height = new_height;
+  output->pixel = calloc(new_height * new_width, sizeof(int8_t));
+
+  for (int y = 0; y < new_height; y++) {
+    for (int x = 0; x < new_width; x++) {
+      int out_idx = y * new_width + x;
+      int sum = 0;
+      for (int i = 0; i < filter_len; i++) {
+        int in_idx = y * img->width + (x + i);
+        sum += (int)input[in_idx] * (int)filter[i];
+      }
+      output->pixel[out_idx] = sum;
+    }
+  }
+
+  return output;
 }
 
 Kernel *blur_kernel(Kernel *kernel, int capacity) {
@@ -86,48 +120,6 @@ Kernel *blur_kernel(Kernel *kernel, int capacity) {
     kernel->values[i] = gauss(i, radius);
   }
   return kernel;
-}
-
-void convolution(unsigned char *input, unsigned char *output, int width,
-                 int height, float *kernel, int capacity) {
-  int radius = capacity / 2;
-
-  Kernel *k = malloc(sizeof(Kernel));
-
-  blur_kernel(k, capacity);
-
-  float *temp = malloc(width * height * sizeof(float));
-  if (!temp)
-    return;
-
-  // horizontal
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      float sum = 0.0f;
-
-      for (int kr = 0; kr < capacity; kr++) {
-        int pixel_x = clamp(x + (kr - radius), 0, width - 1);
-        sum += input[y * width + pixel_x] * k->values[kr];
-      }
-      temp[y * width + x] = sum;
-    }
-  }
-
-  // vertical
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      float sum = 0.0f;
-
-      for (int kr = 0; kr < capacity; kr++) {
-        int pixel_y = clamp(y + (kr - radius), 0, width - 1);
-        sum += temp[pixel_y * width + x];
-      }
-      int final_value = (int)(sum + 0.5f);
-      output[y * width + x] = (unsigned char)clamp(final_value, 0, 255);
-    }
-  }
-
-  free(temp);
 }
 
 Image *load_image(const char *filename) {

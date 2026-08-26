@@ -7,7 +7,7 @@ typedef struct {
   int8_t *R;
   int8_t *G;
   int8_t *B;
-
+  // uint8_t *A;
   int8_t *data;
 
   int width;

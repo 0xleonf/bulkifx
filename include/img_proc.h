@@ -2,4 +2,4 @@
 
 Image *grayscale(Image *img);
 
-Image *blurr(Image *img);
+Image *blurr(Image *img, int ksize);

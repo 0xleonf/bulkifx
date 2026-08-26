@@ -23,8 +23,8 @@ typedef struct {
 } Matrix;
 
 typedef struct {
-  float *values;
-  int capacity;
+  int8_t *value;
+  int ksize;
 } Kernel;
 
 /*
@@ -50,9 +50,11 @@ void stored_pixel(Image *img, int total_pixel);
 // void zero_padding(uint8_t *red_ch, uint8_t *green_ch, uint8_t *blue_ch,
 //                   Image *img, int width, int height, int kernel_size);
 Matrix *zero_padding(Image *img, int8_t *input, int pad_width);
-Matrix *convolute_horizontal(Image *img, int8_t *input, int8_t *filter,
-                             int filter_len);
-Kernel *blur_kernel(Kernel *kernel, int capacity);
+Matrix *convolute_horizontal(Image *img, int width_pad, int height_pad,
+                             int8_t *input, int8_t *filter, int filter_len);
+Matrix *convolute_vertical(Image *img, int raw_width, int8_t *input,
+                           int8_t *filter, int filter_len);
+Kernel *blur_kernel(int ksize);
 void convolution(Image *input, Image *output, int width, int height,
                  float *kernel, int capacity);
 

@@ -28,9 +28,3 @@ Image *grayscale(Image *img) {
   return gray_img;
 }
 
-Image *blurr(Image *img) {
-  if (img == NULL)
-    exit(1);
-
-  return img;
-}

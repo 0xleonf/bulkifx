@@ -33,22 +33,14 @@ int main() {
   const char *filename = "images.jpg";
   Image *img = load_image(filename);
 
-  Image *gray = grayscale(img);
+  Image *blur_img = blurr(img, 25);
 
-  save_image("output_gray.jpg", gray);
+  save_image("blur_img.jpg", blur_img);
 
   image_print_info(img);
 
-  free_image(gray);
+  free_image(blur_img);
   free_image(img);
-
-  Kernel *k = malloc(sizeof(Kernel));
-  k->values = malloc(25 * sizeof(int));
-  blur_kernel(k, 25);
-
-  printf("%f\n", k->values[11]);
-
-  free(k->values);
 
   // check_matrices(img, 0, 10);
   // printf("hello");

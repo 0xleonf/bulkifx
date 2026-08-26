@@ -3,28 +3,24 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-START_TEST(test_blur_kernel) {
-  Image *input = malloc(sizeof(Image));
-  input->width = 2;
-  input->height = 2;
-  input->R = malloc(4 * sizeof(uint8_t));
+START_TEST(test_blur_kernel_3x3) {
+  int8_t expected_pixel[3] = {1, 2, 1};
 
-  uint8_t raw_input[4] = {1, 2, 3, 4};
-  for (int i = 0; i < 4; i++) {
-    input->R[i] = raw_input[i];
+  Kernel *output = blur_kernel(3);
+
+  for (int i = 0; i < 3; i++) {
+    ck_assert_int_eq(output->value[i], expected_pixel[i]);
   }
+}
+END_TEST
 
-  uint8_t expected_pixel[16] = {0, 0, 0, 0, 0, 1, 2, 0, 0, 3, 4, 0, 0, 0, 0, 0};
+START_TEST(test_blur_kernel_5x5) {
+  int8_t expected_pixel[5] = {1, 4, 6, 4, 1};
 
-  Matrix *output = zero_padding(input, input->R, 1);
+  Kernel *output = blur_kernel(5);
 
-  ck_assert_ptr_nonnull(output);
-  ck_assert_ptr_nonnull(output->pixel);
-
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      ck_assert_uint_eq(output->pixel[i * 4 + j], expected_pixel[i * 4 + j]);
-    }
+  for (int i = 0; i < 5; i++) {
+    ck_assert_int_eq(output->value[i], expected_pixel[i]);
   }
 }
 END_TEST
@@ -33,10 +29,11 @@ Suite *padding_suite(void) {
   Suite *s;
   TCase *tc_core;
 
-  s = suite_create("Zero padding");
+  s = suite_create("Blur Kernel");
   tc_core = tcase_create("Core");
 
-  tcase_add_test(tc_core, test_blur_kernel);
+  tcase_add_test(tc_core, test_blur_kernel_3x3);
+  tcase_add_test(tc_core, test_blur_kernel_5x5);
   suite_add_tcase(s, tc_core);
 
   return s;

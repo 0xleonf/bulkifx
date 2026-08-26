@@ -48,3 +48,6 @@ lib.free_image.restype = None
 # img_proc.c
 lib.grayscale.argtypes = [ImagePtr]
 lib.grayscale.restype = ImagePtr
+
+lib.sepia.argtypes = [ImagePtr]
+lib.sepia.restype = ImagePtr

@@ -28,15 +28,18 @@ Image *create_image(int width, int height, int channels) {
 
   img->data = malloc(data_size * channels * sizeof(int8_t));
 
-  if (!img->R || !img->G || !img->B) {
-    free(img->R), free(img->G), free(img->B), free(img->data);
+  if (!img->R || !img->G || !img->B || !img->data) {
     free(img);
+    free(img->R);
+    free(img->G);
+    free(img->B);
+    free(img->data);
     return NULL;
   }
 
-  img->R = calloc(data_size, sizeof(int8_t));
-  img->G = calloc(data_size, sizeof(int8_t));
-  img->B = calloc(data_size, sizeof(int8_t));
+  // img->R = calloc(data_size, sizeof(int8_t));
+  // img->G = calloc(data_size, sizeof(int8_t));
+  // img->B = calloc(data_size, sizeof(int8_t));
 
   return img;
 }
@@ -86,11 +89,36 @@ Matrix *zero_padding(Image *img, int8_t *input, int pad_width) {
   return output;
 }
 
-Matrix *convolute_horizontal(Image *img, int8_t *input, int8_t *filter,
-                             int filter_len) {
+Matrix *convolute_horizontal(Image *img, int width_pad, int height_pad,
+                             int8_t *input, int8_t *filter, int filter_len) {
   Matrix *output = malloc(sizeof(Matrix));
-  int new_width = img->width - filter_len + 1;
   int new_height = img->height;
+  int new_width = img->width - filter_len + 1;
+  output->width = new_width;
+  output->height = new_height;
+  output->pixel = calloc(new_height * new_width, sizeof(int8_t));
+
+  // horizontal
+  for (int y = 0; y < new_height; y++) {
+    for (int x = 0; x < new_width; x++) {
+      int out_idx = y * new_width + x;
+      int sum = 0;
+      for (int i = 0; i < filter_len; i++) {
+        int in_idx = y * width_pad + (x + i);
+        sum += input[in_idx] * filter[i];
+      }
+      output->pixel[out_idx] = sum;
+    }
+  }
+
+  return output;
+}
+
+Matrix *convolute_vertical(Image *img, int raw_width, int8_t *input,
+                           int8_t *filter, int filter_len) {
+  Matrix *output = malloc(sizeof(Matrix));
+  int new_height = img->height - filter_len + 1;
+  int new_width = img->width;
   output->width = new_width;
   output->height = new_height;
   output->pixel = calloc(new_height * new_width, sizeof(int8_t));
@@ -100,8 +128,8 @@ Matrix *convolute_horizontal(Image *img, int8_t *input, int8_t *filter,
       int out_idx = y * new_width + x;
       int sum = 0;
       for (int i = 0; i < filter_len; i++) {
-        int in_idx = y * img->width + (x + i);
-        sum += (int)input[in_idx] * (int)filter[i];
+        int in_idx = (y + i) * raw_width + x;
+        sum += input[in_idx] * filter[i];
       }
       output->pixel[out_idx] = sum;
     }
@@ -110,16 +138,29 @@ Matrix *convolute_horizontal(Image *img, int8_t *input, int8_t *filter,
   return output;
 }
 
-Kernel *blur_kernel(Kernel *kernel, int capacity) {
-  float sum = 0.0f;
-  int radius = capacity / 2;
-  kernel->capacity = capacity;
+Kernel *blur_kernel(int ksize) {
+  Kernel *filter;
+  filter = malloc(sizeof(Kernel));
+  filter->value = malloc(ksize * sizeof(int8_t));
+  filter->ksize = ksize;
 
-  for (int i = 0; i < capacity; i++) {
-    int row = i - radius;
-    kernel->values[i] = gauss(i, radius);
+  if (ksize <= 0) {
+    filter->value = malloc(0 * sizeof(int8_t));
+    return filter;
   }
-  return kernel;
+
+  int n = ksize - 1;
+  int curr = 1;
+  for (int i = 0; i < ksize; i++) {
+    filter->value[i] = 1;
+  }
+
+  for (int k = 1; k < (ksize); k++) {
+    curr = curr * (n - k + 1) / k;
+    filter->value[k] = curr;
+  }
+
+  return filter;
 }
 
 Image *load_image(const char *filename) {
@@ -162,7 +203,7 @@ void save_image(const char *filename, Image *img) {
   int stride_in_bytes = img->width * img->channels;
 
   int success = stbi_write_jpg(filename, img->width, img->height, img->channels,
-                               img->data, stride_in_bytes);
+                               img->data, 90);
   if (success) {
     printf("Succeed: Image successfully saved '%s'\n", filename);
   } else {

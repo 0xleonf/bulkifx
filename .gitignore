@@ -12,3 +12,8 @@ gray_output.jpg
 spon.jpg
 pillow.py
 gambar_grayscale.jpg
+images.jpg
+output_gray.jpg
+test/test_convolute
+test/test_padding
+

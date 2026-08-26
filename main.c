@@ -2,6 +2,7 @@
 #include "./include/img_proc.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // void check_matrices(Image *img, int target_channel, int region_size) {
 //   if (!img)
@@ -29,16 +30,16 @@
 // }
 //
 int main() {
-  const char *filename = "spon.jpg";
+  const char *filename = "images.jpg";
   Image *img = load_image(filename);
 
-  Image *gray = grayscale(img);
+  Image *blur_img = blurr(img, 25);
 
-  save_image("output_gray.jpg", gray);
+  save_image("blur_img.jpg", blur_img);
 
   image_print_info(img);
 
-  free_image(gray);
+  free_image(blur_img);
   free_image(img);
 
   // check_matrices(img, 0, 10);

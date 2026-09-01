@@ -1,10 +1,8 @@
-import bulkifxApp as bp
+import sys
 
-output_ = "gray_output.jpg"
+from ImageProc import Grayscale
 
-img = bp.load_image("spon.jpg")
-
-img_gray = bp.convert_grayscale(img)
-
-bp.save_image(output_, img_gray)
-bp.free_image(img)
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        sys.exit("usage: python3 main.py <input> <output>")
+    Grayscale(sys.argv[1], sys.argv[2])

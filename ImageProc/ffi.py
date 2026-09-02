@@ -19,3 +19,6 @@ lib = ctypes.CDLL(_path_so)
 
 lib.Grayscaling.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
 lib.Grayscaling.restype = ctypes.c_int
+
+lib.Sepia.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+lib.Sepia.restype = ctypes.c_int

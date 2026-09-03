@@ -1,12 +1,10 @@
-import bulkifxApp as bp
+import sys
 
-output_ = "gray_output.jpg"
+from ImageProc import Grayscale, Sepia
 
-img = bp.load_image("spon.jpg")
-
-img_gray = bp.convert_grayscale(img)
-sepia_img = bp.convert_sepia(img)
-
-bp.save_image(output_, img_gray)
-bp.save_image("sepia_output.jpg", sepia_img)
-bp.free_image(img)
+if __name__ == "__main__":
+    # if len(sys.argv) != 3:
+    #     sys.exit("usage: python3 main.py <input> <output>")
+    # Grayscale(sys.argv[1], sys.argv[2])
+    input = "images.jpg"
+    Sepia(input, "output.png")

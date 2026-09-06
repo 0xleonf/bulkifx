@@ -17,7 +17,7 @@ if(BUILD_TESTING)
   pkg_check_modules(CHECK REQUIRED check)
   find_package(Threads REQUIRED)
 
-  foreach(algo IN ITEMS grayscale sepia)
+  foreach(algo IN ITEMS grayscale sepia pad)
     add_executable(test_${algo} test/test_${algo}.c)
     target_compile_options(test_${algo} PRIVATE ${CHECK_CFLAGS_OTHER})
     target_include_directories(test_${algo} PRIVATE ${CHECK_INCLUDE_DIRS})

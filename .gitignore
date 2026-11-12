@@ -8,3 +8,5 @@ gray_output.*
 pillow.py
 *.so
 *.a
+*.o
+compile_commands.json

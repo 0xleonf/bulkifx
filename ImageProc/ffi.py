@@ -22,3 +22,6 @@ lib.Grayscaling.restype = ctypes.c_int
 
 lib.Sepia.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
 lib.Sepia.restype = ctypes.c_int
+
+lib.ZeroPadding.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_short]
+lib.ZeroPadding.restype = ctypes.c_int

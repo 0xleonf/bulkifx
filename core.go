@@ -2,7 +2,6 @@ package main
 
 /*
 #include <stdint.h>
-#include "include/bulkifx/grayscale/grayscale.h"
 */
 import "C"
 
@@ -38,7 +37,7 @@ func toNRGBA(imgSrc image.Image, bounds image.Rectangle) *image.NRGBA {
 	}
 }
 
-func ImagePipeline(pathIn, pathOut string, op ImageOperation) error {
+func ImagePipeline(pathIn, pathOut string, getOutDims func(w, h int) (int, int), op ImageOperation) error {
 	fileIn, err := os.Open(pathIn)
 	if err != nil {
 		return fmt.Errorf("open %s: %w", pathIn, err)
@@ -56,8 +55,13 @@ func ImagePipeline(pathIn, pathOut string, op ImageOperation) error {
 		return fmt.Errorf("empty image: %s", pathIn)
 	}
 
+	outW, outH := w, h
+	if getOutDims != nil {
+		outW, outH = getOutDims(w, h)
+	}
+
 	imgSrcNRGBA := toNRGBA(imgSrc, bounds)
-	imgOutRGBA := image.NewNRGBA(bounds)
+	imgOutRGBA := image.NewNRGBA(image.Rect(0, 0, outW, outH))
 
 	op(
 		(*C.uint8_t)(unsafe.Pointer(&imgSrcNRGBA.Pix[0])),

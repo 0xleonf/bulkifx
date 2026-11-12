@@ -1,6 +1,7 @@
-from .core import Grayscale, Sepia
+from .core import Grayscale, Sepia, ZeroPadding
 
 __all__ = [
     "Grayscale",
-    "Sepia"
+    "Sepia",
+    "ZeroPadding"
 ]
